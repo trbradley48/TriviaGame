@@ -15,7 +15,6 @@
         crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="assets/css/reset.css">
     <link rel="stylesheet" href="assets/css/style.css">
     <title>Document</title>
 </head>
@@ -32,6 +31,8 @@
                     </div>
                 </div>
 
+                <button type="button" class="btn btn-primary start">start</button>
+
                 <!-- Row for the time remaining -->
                 <div class="row">
                     <div class="timerRow">
@@ -45,9 +46,20 @@
 
                     </div>
                 </div>
+
+                <!-- Row for the answers -->
+                <div class="row">
+                    <div class="answerRow">
+                        <button type="button" class="btn btn-light answerButtonStyle" id="a0">Light</button>
+                        <button type="button" class="btn btn-light answerButtonStyle" id="a1">Light</button>
+                        <button type="button" class="btn btn-light answerButtonStyle" id="a2">Light</button>
+                        <button type="button" class="btn btn-light answerButtonStyle" id="a3">Light</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="assets/javascript/app.js"></script>
 </body>
 </html>
