@@ -2,6 +2,11 @@
 
 $(document).ready(function () {
 
+    // variables
+    isStarted = false;
+    isCorrect = false;
+    var questionNum = 0;
+
     // variable object
     var trivia = [{
         question: "what is 2 + 2?",
@@ -11,38 +16,66 @@ $(document).ready(function () {
         question: "what comes after b?",
         choices: ['a', 'c', 'd', 'e'],
         answer: 'c'
+    }, {
+        question: "which animal starts with an a?",
+        choices: ['alligator', 'bat', 'cat', 'dog'],
+        answer: 'alligator'
     }];
 
-    console.log(trivia);
-    
-    // Display question
-    $(".questionRow").html(trivia[0].question);
-    
-    // display answers
-    for (var i=0; i < 4; i++) {
-        $("#a" + i).html(trivia[0].choices[i]);
-        $("#a" + i).attr("value", trivia[0].choices[i]);
+    // console.log(trivia);
 
+    // Display question
+    // $(".questionRow").html(trivia[0].question);
+
+    function startGame() {
+        var startBtn = $("<button type='button' class='btn btn-primary start'>");
+        $(startBtn).text("Start");
+        $(".startRow").append(startBtn);
     }
 
-    // event handler for answer buttons
-    $(".answerButtonStyle").on("click", function() {
-        selectedAnswer = $(this).attr("value")
-        answerButton(selectedAnswer, trivia[0].answer);
-    })
+    // display answers
+    function createBoard() {
+        $(".questionRow").text(trivia[questionNum].question);
+        for (var i = 0; i < 4; i++) {
+            var newBox = $("<button type='button' class='btn btn-light answerButtonStyle'>");
+            $(newBox).attr("id", "a" + i);
+            $(".answerRow").append(newBox);
+            $("#a" + i).text(trivia[questionNum].choices[i]);
+            $("#a" + i).attr("value", trivia[questionNum].choices[i]);
+        }
+
+        // event handler for answer buttons
+        $(".answerButtonStyle").on("click", function () {
+            selectedAnswer = $(this).attr("value");
+            answerButton(selectedAnswer, trivia[questionNum].answer);
+        })
+    }
+    
+    
+    startGame();
+
 
     // countdown
     var time = 3;
-    $(".start").on("click", start);
+    $(".start").on("click", function() {
+        $(".startRow").remove();
+    }, start);
+
+    
+
     function start() {
+
+        isStarted = true;
         intervalId = setInterval(count, 1000);
+        if (isStarted === true) {
+            createBoard();
+        }
     }
 
     function count() {
         time--;
 
         // display time here
-        console.log(time);
         $(".timerRow").html("Time remaining: " + time + " seconds");
         if (time < 1) {
             time = 3;
@@ -53,13 +86,21 @@ $(document).ready(function () {
     function answerButton(guess, answer) {
 
         if (guess == answer) {
+            // debugger;
             console.log("Correct");
+            isCorrect = true;
+            questionNum++;
         }
         else {
             console.log("Incorrect");
         }
+        if (isCorrect === true) {
+            $(".answerRow").empty();
+            createBoard();
+            isCorrect = false;
+        }
     }
-   
+
 
 
 })
