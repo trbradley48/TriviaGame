@@ -1,4 +1,7 @@
 
+// TODO: timer fixes
+// TODO: delete displayAnswer when last question is timed out -- then go to endGame() results
+// TODO: display end game results (the actual stats)
 
 $(document).ready(function () {
 
@@ -8,12 +11,15 @@ $(document).ready(function () {
     var questionNum = 0;
     var correct = 0;
     var incorrect = 0;
+    var unanswered = 0;
     var intervalId;
-    var time = 5;
+    var time = 6;
     var startBtn;
     var startButtonRow;
     var newCorrectAnswer;
     // var newAnswerRow;
+    var clockRunning = false;
+    var playAgain = false;
 
     // variable object
     var trivia = [{
@@ -35,7 +41,7 @@ $(document).ready(function () {
 
     function startGame() {
         // debugger;
-        var startButtonRow = $("<div class='row'>");
+        var startButtonRow = $("<div class='row startBtnRow'>");
         var startBtn = $("<button type='button' class='btn btn-primary startButton'>");
         $(".gameContainer").append(startButtonRow);
         $(startButtonRow).append(startBtn);
@@ -44,30 +50,28 @@ $(document).ready(function () {
 
         $(".startButton").on("click", function () {
             // debugger;
-            $(this).hide();
+            // $(this).remove();
             // $(startButtonRow).hide();
         }, start);
     }
 
     // display answers
     function createBoard() {
-        // debugger;
-        $(startBtn).hide();
+        clearBoard();
         $(".correctAnswerDisplay").remove();
-        console.log("Removed start button");
         var newAnswerRow = $("<div class='row'>");
         var newAnswer = $("<div class='answerRow'>");
         var newQuestionRow = $("<div class='row'>");
         var newQuestion = $("<div class='questionRow'>");
         $(".gameContainer").append(newQuestionRow);
         $(newQuestionRow).append(newQuestion);
-        $(".questionRow").text(trivia[questionNum].question);
+        $(newQuestion).text(trivia[questionNum].question);
         $(".gameContainer").append(newAnswerRow);
         $(newAnswerRow).append(newAnswer);
         for (var i = 0; i < 4; i++) {
             var newBox = $("<button type='button' class='btn btn-light answerButtonStyle'>");
             $(newBox).attr("id", "a" + i);
-            $(".answerRow").append(newBox);
+            $(newAnswer).append(newBox);
             $("#a" + i).text(trivia[questionNum].choices[i]);
             $("#a" + i).attr("value", trivia[questionNum].choices[i]);
         }
@@ -77,6 +81,16 @@ $(document).ready(function () {
             selectedAnswer = $(this).attr("value");
             answerButton(selectedAnswer, trivia[questionNum].answer);
         })
+    }
+
+    function clearBoard() {
+        $(".answerRow").remove();
+        $(".questionRow").remove();
+        $(".startBtnRow").remove();
+        $(".correctAnswerDisplay").remove();
+        $(".resultsTitle").remove();
+        $(".resultsShown").remove();
+        $(".playAgainButton").remove();
     }
 
     function displayCorrectAnswer() {
@@ -90,7 +104,33 @@ $(document).ready(function () {
         else {
             $(newCorrectAnswer).text("Oops! The correct answer is: " + trivia[questionNum].answer);
         }
-        
+
+    }
+
+    // TODO: display results when game is over
+    function endGame() {
+        clearBoard();
+        var resultsTitleBox = $("<div class='resultsTitle'>");
+        var resultsBox = $("<div class='resultsShown'>");
+        $(resultsBox).append("<p class='correctAnswers'>");
+        $(resultsBox).append("<p class='incorrectAnswers'>");
+        $(resultsBox).append("<p class='unanswered'>");
+        var againBox = $("<button type='button' class='btn btn-primary playAgainButton'>");
+        $(resultsTitleBox).text("All done! Here's how you did!");
+        $(againBox).text("Play again");
+        $(".correctAnswers").text("Correct answers: " + correct);
+        $(".incorrectAnswers").text("Incorrect answers: " + incorrect);
+        $(".unanswered").text("Unanswered: " + unanswered);
+        $(".gameContainer").append(resultsTitleBox);
+        $(".gameContainer").append(resultsBox);
+        $(".gameContainer").append(againBox);
+
+        $(".playAgainButton").on("click", function () {
+            questionNum = 0;
+            console.log("question num: " + questionNum);
+            time = 6;
+            createBoard();
+        })
     }
 
 
@@ -103,13 +143,28 @@ $(document).ready(function () {
 
 
 
+    // TODO: get timer to display immediately when game starts
+    // TODO: get timer to refresh from top right when next question populates
+    // TODO: get 
     function start() {
 
         isStarted = true;
-        var intervalId = setInterval(count, 1000);
+        if (!clockRunning) {
+            intervalId = setInterval(count, 1000);
+            clockRunning = true;
+        }
+
         if (isStarted === true) {
             createBoard();
+            isStarted = false;
         }
+    }
+
+    function stop() {
+
+        clearInterval(intervalId);
+        clockRunning = false;
+        time = 6;
     }
 
     function count() {
@@ -118,7 +173,30 @@ $(document).ready(function () {
         // display time here
         $(".timerRow").html("Time remaining: " + time + " seconds");
         if (time < 1) {
-            time = 5;
+
+            unanswered++;
+            clearInterval(intervalId);
+            stop();
+            if (questionNum < trivia.length) {
+                displayCorrectAnswer();
+            }
+            questionNum++;
+            setTimeout(createBoard, 1000);
+            time = 6;
+
+            // clearInterval(intervalId);
+            // stop();
+            // // isCorrect = true;
+            // displayCorrectAnswer();
+            // // isCorrect = false;
+            // questionNum++;
+            // if (questionNum < trivia.length) {
+            //     setTimeout(createBoard, 1000);
+            //     setTimeout(start, 1000);
+            // }
+
+            // setTimeout(start, 1000);
+            // start();
         }
     }
 
@@ -126,26 +204,37 @@ $(document).ready(function () {
     function answerButton(guess, answer) {
 
         if (guess == answer) {
+            correct++;
             clearInterval(intervalId);
-            // debugger;
-            console.log("Correct");
+            stop();
             isCorrect = true;
-            $(".answerRow").remove();
-            // $(newAnswerRow).remove();
-            $(".questionRow").remove();
             displayCorrectAnswer();
             isCorrect = false;
             questionNum++;
-            setTimeout(createBoard, 1000);
+            if (questionNum < trivia.length) {
+                setTimeout(createBoard, 1000);
+                setTimeout(start, 1000);
+            }
+            // setTimeout(createBoard, 1000);
+            // setTimeout(start, 1000);
+
+            // start();
         }
         else {
-            console.log("Incorrect");
-            $(".answerRow").remove();
-            // $(newAnswerRow).remove();
-            $(".questionRow").remove();
+            incorrect++;
+            clearInterval(intervalId);
+            stop();
+
             displayCorrectAnswer();
             questionNum++;
             setTimeout(createBoard, 1000);
+
+            // setTimeout(start, 1000);
+        }
+        if (questionNum == trivia.length) {
+            stop();
+            endGame();
+
         }
     }
 
