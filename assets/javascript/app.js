@@ -6,6 +6,14 @@ $(document).ready(function () {
     isStarted = false;
     isCorrect = false;
     var questionNum = 0;
+    var correct = 0;
+    var incorrect = 0;
+    var intervalId;
+    var time = 5;
+    var startBtn;
+    var startButtonRow;
+    var newCorrectAnswer;
+    // var newAnswerRow;
 
     // variable object
     var trivia = [{
@@ -22,20 +30,40 @@ $(document).ready(function () {
         answer: 'alligator'
     }];
 
-    // console.log(trivia);
-
     // Display question
     // $(".questionRow").html(trivia[0].question);
 
     function startGame() {
-        var startBtn = $("<button type='button' class='btn btn-primary start'>");
+        // debugger;
+        var startButtonRow = $("<div class='row'>");
+        var startBtn = $("<button type='button' class='btn btn-primary startButton'>");
+        $(".gameContainer").append(startButtonRow);
+        $(startButtonRow).append(startBtn);
         $(startBtn).text("Start");
-        $(".startRow").append(startBtn);
+        // $(".gameContainer").append(startBtn);
+
+        $(".startButton").on("click", function () {
+            // debugger;
+            $(this).hide();
+            // $(startButtonRow).hide();
+        }, start);
     }
 
     // display answers
     function createBoard() {
+        // debugger;
+        $(startBtn).hide();
+        $(".correctAnswerDisplay").remove();
+        console.log("Removed start button");
+        var newAnswerRow = $("<div class='row'>");
+        var newAnswer = $("<div class='answerRow'>");
+        var newQuestionRow = $("<div class='row'>");
+        var newQuestion = $("<div class='questionRow'>");
+        $(".gameContainer").append(newQuestionRow);
+        $(newQuestionRow).append(newQuestion);
         $(".questionRow").text(trivia[questionNum].question);
+        $(".gameContainer").append(newAnswerRow);
+        $(newAnswerRow).append(newAnswer);
         for (var i = 0; i < 4; i++) {
             var newBox = $("<button type='button' class='btn btn-light answerButtonStyle'>");
             $(newBox).attr("id", "a" + i);
@@ -50,23 +78,35 @@ $(document).ready(function () {
             answerButton(selectedAnswer, trivia[questionNum].answer);
         })
     }
-    
-    
+
+    function displayCorrectAnswer() {
+        var newCorrectAnswerRow = $("<div class='row'>");
+        var newCorrectAnswer = $("<div class='correctAnswerDisplay'>");
+        $(".gameContainer").append(newCorrectAnswerRow);
+        $(newCorrectAnswerRow).append(newCorrectAnswer);
+        if (isCorrect) {
+            $(newCorrectAnswer).text("You are correct!");
+        }
+        else {
+            $(newCorrectAnswer).text("Oops! The correct answer is: " + trivia[questionNum].answer);
+        }
+        
+    }
+
+
     startGame();
 
 
     // countdown
-    var time = 3;
-    $(".start").on("click", function() {
-        $(".startRow").remove();
-    }, start);
+    // var time = 5;
+    // $(".start").on("click", start);
 
-    
+
 
     function start() {
 
         isStarted = true;
-        intervalId = setInterval(count, 1000);
+        var intervalId = setInterval(count, 1000);
         if (isStarted === true) {
             createBoard();
         }
@@ -78,7 +118,7 @@ $(document).ready(function () {
         // display time here
         $(".timerRow").html("Time remaining: " + time + " seconds");
         if (time < 1) {
-            time = 3;
+            time = 5;
         }
     }
 
@@ -86,20 +126,29 @@ $(document).ready(function () {
     function answerButton(guess, answer) {
 
         if (guess == answer) {
+            clearInterval(intervalId);
             // debugger;
             console.log("Correct");
             isCorrect = true;
+            $(".answerRow").remove();
+            // $(newAnswerRow).remove();
+            $(".questionRow").remove();
+            displayCorrectAnswer();
+            isCorrect = false;
             questionNum++;
+            setTimeout(createBoard, 1000);
         }
         else {
             console.log("Incorrect");
-        }
-        if (isCorrect === true) {
-            $(".answerRow").empty();
-            createBoard();
-            isCorrect = false;
+            $(".answerRow").remove();
+            // $(newAnswerRow).remove();
+            $(".questionRow").remove();
+            displayCorrectAnswer();
+            questionNum++;
+            setTimeout(createBoard, 1000);
         }
     }
+
 
 
 
